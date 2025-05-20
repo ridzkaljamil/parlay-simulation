@@ -1,0 +1,13 @@
+{
+  "name": "slot-simulation",
+  "version": "1.0.0",
+  "description": "Simulasi Slot Game dengan WebSocket",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  }
+}

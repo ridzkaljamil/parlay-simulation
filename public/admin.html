@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Simulasi Slot Game</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+    <style>
+      /* Notification animation */
+      #notification {
+        transition: transform 0.3s ease-in-out;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-b from-gray-900 to-black min-h-screen p-4">
+    <div class="max-w-6xl mx-auto">
+      <div class="bg-black/50 p-4 mb-6 rounded-lg text-center">
+        <h1 class="text-3xl md:text-4xl font-bold text-yellow-400 mb-2">PANEL ADMIN SLOT GAME</h1>
+        <p class="text-white text-lg">Panel ini digunakan untuk mengontrol permainan slot dari sisi admin</p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Client Status Card -->
+        <div id="client-status-card" class="bg-gray-800 rounded-lg shadow-lg border-2 border-red-500 overflow-hidden">
+          <div class="p-4 bg-gray-900">
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <span id="connection-indicator" class="w-3 h-3 rounded-full mr-2 bg-red-500"></span>
+              Status Koneksi Client
+            </h2>
+            <p id="connection-status" class="text-gray-400">Client tidak terhubung</p>
+          </div>
+          <div class="p-4 space-y-3">
+            <div class="flex justify-between text-white">
+              <span class="font-medium">Saldo Client:</span>
+              <span id="client-balance">Rp 0</span>
+            </div>
+            <div class="flex justify-between text-white">
+              <span class="font-medium">Total Spin:</span>
+              <span id="client-spin-count">0</span>
+            </div>
+            <div class="flex justify-between text-white">
+              <span class="font-medium">Kemenangan Terakhir:</span>
+              <span id="client-win-amount">Rp 0</span>
+            </div>
+            <div class="flex justify-between text-white">
+              <span class="font-medium">Status:</span>
+              <span id="client-status">Idle</span>
+            </div>
+            <div class="flex justify-between text-white">
+              <span class="font-medium">Aktivitas Terakhir:</span>
+              <span id="client-last-action">Belum ada aktivitas</span>
+            </div>
+          </div>
+          <div class="p-4 bg-gray-900 flex justify-between">
+            <button class="adjust-balance-btn bg-red-600 text-white px-3 py-1 rounded" data-amount="-10000">-10,000</button>
+            <button class="adjust-balance-btn bg-red-600 text-white px-3 py-1 rounded" data-amount="-5000">-5,000</button>
+            <button class="adjust-balance-btn bg-green-600 text-white px-3 py-1 rounded" data-amount="5000">+5,000</button>
+            <button class="adjust-balance-btn bg-green-600 text-white px-3 py-1 rounded" data-amount="10000">+10,000</button>
+            <button class="adjust-balance-btn bg-green-600 text-white px-3 py-1 rounded" data-amount="50000">+50,000</button>
+          </div>
+        </div>
+
+        <!-- Manipulation Card -->
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div class="p-4 bg-gray-900">
+            <h2 class="text-xl font-bold text-white">Manipulasi Hasil</h2>
+            <p class="text-gray-400">Atur kapan dan berapa kemenangan yang akan diberikan</p>
+          </div>
+          <div class="p-4 space-y-4">
+            <div class="flex items-center space-x-2">
+              <input type="checkbox" id="rigged-active" class="w-4 h-4" />
+              <label for="rigged-active" class="text-white">Aktifkan Manipulasi</label>
+            </div>
+
+            <div class="space-y-2">
+              <label for="rigged-spin-number" class="text-white">Spin ke berapa yang akan menang:</label>
+              <input type="number" id="rigged-spin-number" class="w-full p-2 rounded bg-gray-700 text-white" value="5" min="1" />
+            </div>
+
+            <div class="space-y-2">
+              <label for="rigged-win-amount" class="text-white">Jumlah kemenangan (Rp):</label>
+              <input type="number" id="rigged-win-amount" class="w-full p-2 rounded bg-gray-700 text-white" value="20000" min="3000" step="1000" />
+            </div>
+
+            <div class="grid grid-cols-3 gap-2" id="quick-amount-buttons">
+              <!-- Quick amount buttons will be added dynamically -->
+            </div>
+          </div>
+          <div class="p-4 bg-gray-900">
+            <button id="save-rigged-settings" class="w-full bg-blue-600 text-white py-2 rounded">Simpan Pengaturan</button>
+          </div>
+        </div>
+
+        <!-- Win/Loss Pattern Card -->
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div class="p-4 bg-gray-900">
+            <h2 class="text-xl font-bold text-white">Pola Menang/Kalah</h2>
+            <p class="text-gray-400">Atur frekuensi kemenangan pemain</p>
+          </div>
+          <div class="p-4 space-y-4">
+            <div class="flex items-center space-x-2">
+              <input type="checkbox" id="pattern-active" class="w-4 h-4" />
+              <label for="pattern-active" class="text-white">Aktifkan Kontrol Pola</label>
+            </div>
+
+            <div class="space-y-2">
+              <label for="win-frequency" class="text-white">Frekuensi Kemenangan:</label>
+              <div class="flex items-center">
+                <span class="text-white mr-2">1 win per</span>
+                <input type="number" id="win-frequency" class="w-20 p-2 rounded bg-gray-700 text-white" value="20" min="2" max="100" />
+                <span class="text-white ml-2">spins</span>
+              </div>
+              <p class="text-xs text-gray-400">Contoh: Nilai 20 berarti pemain akan menang 1 kali dari 20 putaran</p>
+            </div>
+
+            <div class="pt-2">
+              <div class="text-sm text-white mb-1">Perkiraan RTP:</div>
+              <div id="estimated-rtp" class="text-lg font-bold text-yellow-400">5%</div>
+              <p class="text-xs text-gray-400">RTP (Return to Player) adalah persentase uang yang dikembalikan ke pemain dalam jangka panjang</p>
+            </div>
+
+            <div class="pt-2 border-t border-gray-700 mt-4">
+              <div class="text-sm text-white mb-2">Paksa Hasil Berikutnya:</div>
+              <div class="flex space-x-2">
+                <button id="force-win" class="bg-green-600 text-white px-4 py-2 rounded flex-1">Menang</button>
+                <button id="force-lose" class="bg-red-600 text-white px-4 py-2 rounded flex-1">Kalah</button>
+              </div>
+              <p class="text-xs text-gray-400 mt-1">Ini akan memaksa hasil untuk spin berikutnya saja</p>
+            </div>
+          </div>
+          <div class="p-4 bg-gray-900">
+            <button id="save-pattern-settings" class="w-full bg-blue-600 text-white py-2 rounded">Simpan Pengaturan Pola</button>
+          </div>
+        </div>
+
+        <!-- Bonus & Reset Card -->
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div class="p-4 bg-gray-900">
+            <h2 class="text-xl font-bold text-white">Bonus & Reset</h2>
+            <p class="text-gray-400">Berikan bonus atau reset permainan</p>
+          </div>
+          <div class="p-4 space-y-4">
+            <div class="space-y-2">
+              <label for="free-spin-count" class="text-white">Berikan Free Spin:</label>
+              <div class="flex space-x-2">
+                <input type="number" id="free-spin-count" class="flex-1 p-2 rounded bg-gray-700 text-white" value="1" min="1" max="10" />
+                <button id="give-free-spin" class="bg-green-600 text-white px-4 py-2 rounded">Berikan</button>
+              </div>
+            </div>
+
+            <div class="pt-4 border-t border-gray-700">
+              <button id="reset-game" class="w-full bg-red-600 text-white py-2 rounded">Reset Permainan</button>
+              <p class="text-xs text-gray-400 mt-2">Ini akan mereset saldo ke Rp 100.000 dan menghapus semua riwayat</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Spin History Card -->
+        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden lg:col-span-3">
+          <div class="p-4 bg-gray-900">
+            <h2 class="text-xl font-bold text-white">Riwayat Spin</h2>
+            <p class="text-gray-400">Riwayat spin yang dilakukan oleh client</p>
+          </div>
+          <div class="p-4">
+            <div id="spin-history" class="space-y-2 max-h-[300px] overflow-y-auto">
+              <div class="text-center py-8 text-gray-500">Belum ada riwayat spin</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+      <div class="bg-gray-800 rounded-lg max-w-md w-full">
+        <div class="p-4 border-b border-gray-700">
+          <h3 class="text-xl font-bold text-white">Konfirmasi</h3>
+        </div>
+        <div class="p-4">
+          <p id="confirm-message" class="text-white">Apakah Anda yakin?</p>
+        </div>
+        <div class="p-4 border-t border-gray-700 flex justify-end space-x-2">
+          <button id="cancel-confirm" class="bg-gray-600 text-white px-4 py-2 rounded">Batal</button>
+          <button id="proceed-confirm" class="bg-red-600 text-white px-4 py-2 rounded">Lanjutkan</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="fixed top-4 right-4 bg-black bg-opacity-80 text-white p-4 rounded-lg shadow-lg transform transition-transform duration-300 translate-x-full">
+      <p id="notification-message"></p>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // Game data
+      let symbols = [];
+      let payTable = {};
+
+      // Game state
+      let gameState = {
+        balance: 100000,
+        spinCount: 0,
+        winAmount: 0,
+        isSpinning: false,
+        freeSpins: 0,
+        multiplier: 1,
+        consecutiveWins: 0,
+      };
+
+      let riggedSettings = {
+        active: false,
+        spinNumber: 5,
+        winAmount: 20000,
+      };
+
+      let patternSettings = {
+        active: false,
+        winFrequency: 20,
+      };
+
+      let spinHistory = [];
+      let confirmCallback = null;
+
+      // Initialize socket connection
+      const socket = io();
+
+      // Register as admin
+      socket.emit("register", "admin");
+
+      // DOM elements
+      const connectionIndicator = document.getElementById("connection-indicator");
+      const connectionStatus = document.getElementById("connection-status");
+      const clientStatusCard = document.getElementById("client-status-card");
+      const clientBalance = document.getElementById("client-balance");
+      const clientSpinCount = document.getElementById("client-spin-count");
+      const clientWinAmount = document.getElementById("client-win-amount");
+      const clientStatus = document.getElementById("client-status");
+      const clientLastAction = document.getElementById("client-last-action");
+      const adjustBalanceButtons = document.querySelectorAll(".adjust-balance-btn");
+      const riggedActiveCheckbox = document.getElementById("rigged-active");
+      const riggedSpinNumber = document.getElementById("rigged-spin-number");
+      const riggedWinAmount = document.getElementById("rigged-win-amount");
+      const quickAmountButtons = document.getElementById("quick-amount-buttons");
+      const saveRiggedSettings = document.getElementById("save-rigged-settings");
+      const patternActiveCheckbox = document.getElementById("pattern-active");
+      const winFrequencyInput = document.getElementById("win-frequency");
+      const estimatedRtpElement = document.getElementById("estimated-rtp");
+      const savePatternSettings = document.getElementById("save-pattern-settings");
+      const forceWinButton = document.getElementById("force-win");
+      const forceLoseButton = document.getElementById("force-lose");
+      const freeSpinCount = document.getElementById("free-spin-count");
+      const giveFreeSpinButton = document.getElementById("give-free-spin");
+      const resetGameButton = document.getElementById("reset-game");
+      const spinHistoryContainer = document.getElementById("spin-history");
+      const confirmModal = document.getElementById("confirm-modal");
+      const confirmMessage = document.getElementById("confirm-message");
+      const cancelConfirmButton = document.getElementById("cancel-confirm");
+      const proceedConfirmButton = document.getElementById("proceed-confirm");
+      const notification = document.getElementById("notification");
+      const notificationMessage = document.getElementById("notification-message");
+
+      // Format currency
+      function formatCurrency(amount) {
+        return "Rp " + amount.toLocaleString();
+      }
+
+      // Show notification
+      function showNotification(message, duration = 3000) {
+        notificationMessage.textContent = message;
+        notification.classList.remove("translate-x-full");
+
+        setTimeout(() => {
+          notification.classList.add("translate-x-full");
+        }, duration);
+      }
+
+      // Update estimated RTP based on win frequency
+      function updateEstimatedRTP() {
+        const frequency = parseInt(winFrequencyInput.value);
+        // Estimate average win amount (simplified calculation)
+        const avgWinAmount = 15000; // Rough average of possible win amounts
+        const spinCost = 10000; // Updated spin cost
+
+        // RTP = (1/frequency * avgWinAmount) / (spinCost * frequency) * 100
+        const rtp = (avgWinAmount / (spinCost * frequency)) * 100;
+        estimatedRtpElement.textContent = `${rtp.toFixed(1)}%`;
+
+        // Change color based on RTP value
+        if (rtp < 50) {
+          estimatedRtpElement.className = "text-lg font-bold text-red-500";
+        } else if (rtp < 85) {
+          estimatedRtpElement.className = "text-lg font-bold text-yellow-400";
+        } else {
+          estimatedRtpElement.className = "text-lg font-bold text-green-500";
+        }
+      }
+
+      // Event listeners
+      adjustBalanceButtons.forEach((button) => {
+        button.addEventListener("click", () => {
+          const amount = parseInt(button.dataset.amount);
+          socket.emit("adjustBalance", amount);
+        });
+      });
+
+      saveRiggedSettings.addEventListener("click", () => {
+        riggedSettings = {
+          active: riggedActiveCheckbox.checked,
+          spinNumber: parseInt(riggedSpinNumber.value),
+          winAmount: parseInt(riggedWinAmount.value),
+        };
+
+        socket.emit("setRiggedSettings", riggedSettings);
+        showNotification("Pengaturan manipulasi disimpan");
+      });
+
+      winFrequencyInput.addEventListener("input", updateEstimatedRTP);
+
+      savePatternSettings.addEventListener("click", () => {
+        patternSettings = {
+          active: patternActiveCheckbox.checked,
+          winFrequency: parseInt(winFrequencyInput.value),
+        };
+
+        socket.emit("setPatternSettings", patternSettings);
+        showNotification("Pengaturan pola menang/kalah disimpan");
+      });
+
+      forceWinButton.addEventListener("click", () => {
+        socket.emit("forceNextResult", "win");
+      });
+
+      forceLoseButton.addEventListener("click", () => {
+        socket.emit("forceNextResult", "lose");
+      });
+
+      giveFreeSpinButton.addEventListener("click", () => {
+        const count = parseInt(freeSpinCount.value);
+        if (count > 0) {
+          socket.emit("giveFreeSpin", count);
+        }
+      });
+
+      resetGameButton.addEventListener("click", () => {
+        showConfirmation("Apakah Anda yakin ingin mereset permainan? Semua data akan dihapus.", () => {
+          socket.emit("resetGame");
+        });
+      });
+
+      cancelConfirmButton.addEventListener("click", () => {
+        confirmModal.classList.add("hidden");
+      });
+
+      proceedConfirmButton.addEventListener("click", () => {
+        if (confirmCallback) {
+          confirmCallback();
+          confirmCallback = null;
+        }
+        confirmModal.classList.add("hidden");
+      });
+
+      // Socket event handlers
+      socket.on("gameData", (data) => {
+        symbols = data.symbols;
+        payTable = data.payTable;
+
+        // Initialize quick amount buttons
+        initializeQuickAmountButtons();
+
+        // Initialize RTP calculation
+        updateEstimatedRTP();
+      });
+
+      socket.on("gameState", (state) => {
+        gameState = state;
+        updateUI();
+      });
+
+      socket.on("spinHistory", (history) => {
+        spinHistory = history;
+        updateSpinHistory();
+      });
+
+      socket.on("clientStatus", (status) => {
+        updateClientStatus(status.connected);
+      });
+
+      socket.on("clientAction", (data) => {
+        clientLastAction.textContent = data.action;
+      });
+
+      socket.on("riggedSettings", (settings) => {
+        riggedSettings = settings;
+        updateRiggedSettingsUI();
+      });
+
+      socket.on("patternSettings", (settings) => {
+        patternSettings = settings;
+        updatePatternSettingsUI();
+      });
+
+      socket.on("notification", (data) => {
+        showNotification(data.message);
+      });
+
+      // Functions
+      function updateUI() {
+        // Update client info
+        clientBalance.textContent = formatCurrency(gameState.balance);
+        clientSpinCount.textContent = gameState.spinCount;
+        clientWinAmount.textContent = formatCurrency(gameState.winAmount);
+        clientStatus.textContent = gameState.isSpinning ? "Sedang Spin" : "Idle";
+
+        // Update rigged spin number min value
+        riggedSpinNumber.min = gameState.spinCount + 1;
+
+        // If current spin count is greater than rigged spin number, increment it
+        if (gameState.spinCount >= riggedSpinNumber.value) {
+          riggedSpinNumber.value = gameState.spinCount + 1;
+        }
+      }
+
+      function updateClientStatus(connected) {
+        if (connected) {
+          connectionIndicator.classList.remove("bg-red-500");
+          connectionIndicator.classList.add("bg-green-500");
+          connectionStatus.textContent = "Client terhubung dan aktif";
+          clientStatusCard.classList.remove("border-red-500");
+          clientStatusCard.classList.add("border-green-500");
+        } else {
+          connectionIndicator.classList.remove("bg-green-500");
+          connectionIndicator.classList.add("bg-red-500");
+          connectionStatus.textContent = "Client tidak terhubung atau tidak aktif";
+          clientStatusCard.classList.remove("border-green-500");
+          clientStatusCard.classList.add("border-red-500");
+        }
+      }
+
+      function updateRiggedSettingsUI() {
+        riggedActiveCheckbox.checked = riggedSettings.active;
+        riggedSpinNumber.value = riggedSettings.spinNumber;
+        riggedWinAmount.value = riggedSettings.winAmount;
+      }
+
+      function updatePatternSettingsUI() {
+        patternActiveCheckbox.checked = patternSettings.active;
+        winFrequencyInput.value = patternSettings.winFrequency;
+        updateEstimatedRTP();
+      }
+
+      function updateSpinHistory() {
+        if (spinHistory.length === 0) {
+          spinHistoryContainer.innerHTML = '<div class="text-center py-8 text-gray-500">Belum ada riwayat spin</div>';
+          return;
+        }
+
+        spinHistoryContainer.innerHTML = "";
+
+        spinHistory.forEach((item, index) => {
+          const historyItem = document.createElement("div");
+          historyItem.className = "bg-gray-700 p-3 rounded-lg flex justify-between";
+
+          const spinInfo = document.createElement("div");
+          spinInfo.innerHTML = `
+                    <span class="font-medium text-white">Spin #${item.spinNumber}</span>
+                    <span class="text-gray-400 text-sm ml-2">${new Date(item.timestamp).toLocaleTimeString()}</span>
+                `;
+
+          const winInfo = document.createElement("span");
+          winInfo.className = item.winAmount > 0 ? "text-green-400 font-bold" : "text-gray-400";
+          winInfo.textContent = item.winAmount > 0 ? `+${formatCurrency(item.winAmount)}` : "Tidak Menang";
+
+          historyItem.appendChild(spinInfo);
+          historyItem.appendChild(winInfo);
+
+          spinHistoryContainer.appendChild(historyItem);
+        });
+      }
+
+      function initializeQuickAmountButtons() {
+        quickAmountButtons.innerHTML = "";
+
+        if (!symbols.length || !Object.keys(payTable).length) return;
+
+        symbols.forEach((symbol) => {
+          const button = document.createElement("button");
+          button.className = "flex flex-col items-center p-2 bg-gray-700 hover:bg-gray-600 rounded";
+          button.innerHTML = `
+                    <span class="text-2xl mb-1">${symbol.icon}</span>
+                    <span class="text-xs text-white">${symbol.name}</span>
+                    <span class="text-xs font-bold text-white">${formatCurrency(payTable[symbol.id][3])}</span>
+                `;
+
+          button.addEventListener("click", () => {
+            riggedWinAmount.value = payTable[symbol.id][3];
+          });
+
+          quickAmountButtons.appendChild(button);
+        });
+      }
+
+      function showConfirmation(message, callback) {
+        confirmMessage.textContent = message;
+        confirmCallback = callback;
+        confirmModal.classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>
